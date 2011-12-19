@@ -1,0 +1,26 @@
+GST_PLUGINS_EXT="dts faad gme libmms mimic mpeg2enc mplex rtmp xvid"
+inherit gst-plugins
+
+PATCH_URI="0.10.22-mjpegtools20.patch"
+
+PKG_NAMES="${PN}"
+PKG_HINTS="bad"
+
+for ext in ${GST_PLUGINS_EXT}
+do
+	PKG_NAMES+=" ${PN%-bad}-${ext}"
+	PKG_HINTS+=" ${ext}"
+	declare gstreamer0_10_plugins_${ext}_CONTENTS="${GST_PLUGINDIR#/}/*gst${ext#lib}*"
+	gstreamer0_10_plugins_bad_CONTENTS+=" --exclude=*gst${ext#lib}*"
+done
+unset ext
+
+gstreamer0_10_plugins_bad_CONTENTS+=" usr/lib/gstreamer-0.10/ usr/share/doc/"
+
+CYGCONF_ARGS="--with-plugins=dvbsuboverlay,dvdspu,real,siren --disable-shm --disable-gtk-doc"
+
+src_install() {
+	cd ${B}
+	cyginstall -C gst
+	cyginstall -C ext
+}
