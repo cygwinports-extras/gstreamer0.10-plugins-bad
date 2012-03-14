@@ -1,0 +1,34 @@
+GST_PLUGINS_ENABLE="dts faad gme libmms mimic mpeg2enc mplex rtmp voaacenc
+                    voamrwbenc xvid"
+GST_PLUGINS_DISABLE="acm apexsink assrender bz2 cdaudio celt cog curl dc1394
+	dirac direct3d directdraw directfb directsound divx dvb faac fbdev
+	flite gsettings gsm jp2k kate ladspa lv2 modplug musepack musicbrainz
+	mythtv nas neon ofa openal opencv osx_video opus pvr quicktime
+	resindvd rsvg schro sdl shm sndfile soundtouch spandsp spc swfdec
+	timidity vcd vdpau vp8 wildmidi wininet zbar"
+inherit gst-plugins
+
+PKG_NAMES="${PN}"
+PKG_HINTS="bad"
+
+for ext in ${GST_PLUGINS_ENABLE}
+do
+	PKG_NAMES+=" ${PN%-bad}-${ext}"
+	PKG_HINTS+=" ${ext}"
+	declare gstreamer0_10_plugins_${ext}_CONTENTS="${GST_PLUGINDIR#/}/cyggst${ext#lib}*.dll"
+	gstreamer0_10_plugins_bad_CONTENTS+=" --exclude=cyggst${ext#lib}*.dll"
+done
+unset ext
+
+gstreamer0_10_plugins_bad_CONTENTS+=" usr/lib/gstreamer-0.10/ usr/share/doc/"
+gstreamer0_10_plugins_voamrwbenc_CONTENTS+=" usr/share/gstreamer-0.10/presets/GstVoAmrwbEnc.prs"
+
+CYGCONF_ARGS="--with-plugins=dvbsuboverlay,dvdspu,real,siren --disable-gtk-doc"
+
+src_install() {
+	cd ${B}
+	cyginstall -C gst
+	cyginstall -C ext
+}
+
+KEEP_LA_FILES="none"
